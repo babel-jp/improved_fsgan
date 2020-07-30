@@ -2,7 +2,8 @@
 
 import numpy as np
 from itertools import count
-import ffmpeg
+# import ffmpeg
+import cv2
 from fsgan.utils.one_euro_filter import OneEuroFilter
 
 
@@ -203,14 +204,21 @@ def get_media_info(media_path):
             - total_frames (int): Total number of frames (will be 1 for images)
             - fps (float): Frames per second (irrelevant for images)
     """
-    probe = ffmpeg.probe(media_path)
-    video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
-    width = int(video_stream['width'])
-    height = int(video_stream['height'])
-    total_frames = int(video_stream['nb_frames']) if 'nb_frames' in video_stream else 1
-    fps_part1, fps_part2 = video_stream['r_frame_rate'].split(sep='/')
-    fps = float(fps_part1) / float(fps_part2)
+    cap = cv2.VideoCapture(media_path)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+#     probe = ffmpeg.probe(media_path)
+#     video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
+#     width = int(video_stream['width'])
+#     height = int(video_stream['height'])
+#     total_frames = int(video_stream['nb_frames']) if 'nb_frames' in video_stream else 1
+#     fps_part1, fps_part2 = video_stream['r_frame_rate'].split(sep='/')
+#     fps = float(fps_part1) / float(fps_part2)
 
+    cap.release()
     return width, height, total_frames, fps
 
 
